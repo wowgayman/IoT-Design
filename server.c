@@ -16,6 +16,7 @@ char a[50];
 void* runthread(void* arg){
 
   int listenfd = 0, connfd = 0;
+  int n = 0;
   struct sockaddr_in serv_addr;
   char sendBuff[1025];
   char readBuff[1025];
@@ -32,17 +33,20 @@ void* runthread(void* arg){
 pthread_t id=pthread_self();
 
 if (pthread_equal(id,tid[0])){
-  listenfd = socket(AF_INET, SOCK_STREAM, 0);
+  while (1) {
+    listenfd = socket(AF_INET, SOCK_STREAM, 0);
   memset(&serv_addr, '0', sizeof(serv_addr));
   bind(listenfd, (struct sockaddr*)&serv_addr, sizeof(serv_addr));
   listen(listenfd, 10);
-  while (1) {
+  while(1){
     connfd = accept(listenfd, (struct sockaddr*)NULL, NULL);
-    read(connfd,readBuff,sizeof(readBuff)-1);
+    while ( (n = read(connfd, readBuff, sizeof(readBuff)-1)) > 0)
+        readBuff[n] = 0;
     printf("%s\n", readBuff);
     close(connfd);
     sleep(1);
     }
+  }
 }
 else{
     int sockfd = 0, n = 0;
